@@ -15,16 +15,22 @@ var cloneCmd = cli.Command{
 	Description: "clone is used to setup go project in local",
 	Flags: []cli.Flag{
 		cli.StringFlag{
+			Name:  "remote",
+			Value: "origin",
+			Usage: "set repo remote name",
+		},
+		cli.StringFlag{
 			Name:  "upstream",
-			Usage: "add upstream remote repo",
+			Usage: "add upstream repository",
 		},
 	},
 	Action: func(cliCtx *cli.Context) error {
 		var (
-			ctx       = context.Background()
-			pkg       = cliCtx.Args().Get(0)
-			repoURL   = cliCtx.Args().Get(1)
-			remoteURL = cliCtx.String("upstream")
+			ctx        = context.Background()
+			pkg        = cliCtx.Args().Get(0)
+			repoURL    = cliCtx.Args().Get(1)
+			remoteName = cliCtx.String("remote")
+			remoteURL  = cliCtx.String("upstream")
 		)
 
 		if pkg == "" {
@@ -41,7 +47,7 @@ var cloneCmd = cli.Command{
 		}
 
 		targetDir := filepath.Join(gopath, "src", pkg)
-		repo, err := cloneRepo(ctx, targetDir, repoURL)
+		repo, err := cloneRepo(ctx, targetDir, repoURL, withRemoteName(remoteName))
 		if err != nil {
 			return err
 		}
