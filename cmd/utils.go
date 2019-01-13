@@ -11,6 +11,15 @@ import (
 	"gopkg.in/src-d/go-git.v4/config"
 )
 
+type cloneOpt func(*git.CloneOptions) error
+
+func withRemoteName(name string) cloneOpt {
+	return func(opt *git.CloneOptions) error {
+		opt.RemoteName = name
+		return nil
+	}
+}
+
 func createRemote(ctx context.Context, repo *git.Repository, name, url string) error {
 	_, err := repo.CreateRemote(&config.RemoteConfig{
 		Name: name,
@@ -19,12 +28,21 @@ func createRemote(ctx context.Context, repo *git.Repository, name, url string) e
 	return err
 }
 
-func cloneRepo(ctx context.Context, path string, repoURL string) (*git.Repository, error) {
-	return git.PlainCloneContext(ctx, path, false, &git.CloneOptions{
+// cloneRepo clones remote repo into local path.
+func cloneRepo(ctx context.Context, path string, repoURL string, opts ...cloneOpt) (*git.Repository, error) {
+	copt := &git.CloneOptions{
 		URL: repoURL,
-	})
+	}
+
+	for _, o := range opts {
+		if err := o(copt); err != nil {
+			return nil, err
+		}
+	}
+	return git.PlainCloneContext(ctx, path, false, copt)
 }
 
+// resolveGOPATH gets the first GOPATH.
 func resolveGOPATH() (string, error) {
 	gopaths := os.Getenv("GOPATH")
 	if gopaths == "" {
