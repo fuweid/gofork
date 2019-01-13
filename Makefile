@@ -1,6 +1,9 @@
 NAME := Wei Fu
 EMAIL := fuweid89@gmail.com
 
+# by default to use go.mod
+GO111MODULE=on
+
 # command name
 COMMAND=gofork
 
